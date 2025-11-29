@@ -1,0 +1,6 @@
+@EasyMart.API_HostAddress = http://localhost:5211
+
+GET {{EasyMart.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
