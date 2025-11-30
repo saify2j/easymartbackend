@@ -1,4 +1,5 @@
 ﻿using EasyMart.API.Application.Common;
+using System;
 
 namespace EasyMart.API.Middleware
 {
@@ -23,15 +24,19 @@ namespace EasyMart.API.Middleware
         {
             
             var requestId = CreateRequestId();
+            var clientIp = ResolveClientIp(httpContext);
+
 
             requestContext.RequestId = requestId;
+            requestContext.ClientIp = clientIp;
 
             // Expose to client (optional)
             httpContext.Response.Headers[HeaderName] = requestId;
 
             using (_logger.BeginScope(new Dictionary<string, object>
             {
-                ["RequestId"] = requestId
+                ["RequestId"] = requestId,
+                ["ClientIp"] = clientIp
             }))
             {
                 await _next(httpContext);
@@ -42,6 +47,17 @@ namespace EasyMart.API.Middleware
         {
             // Compact, high-entropy, sortable-friendly
             return Guid.NewGuid().ToString("N");
+        }
+        private static string ResolveClientIp(HttpContext context)
+        {
+            // When behind reverse proxies (NGINX, Azure, etc.)
+            var forwarded = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(forwarded))
+            {
+                return forwarded.Split(',')[0].Trim();
+            }
+
+            return context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
         }
     }
 }

@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="../Easy.Logging/Easy.Logging.csproj" Id="333ef1c5-61a7-496f-9e22-352ccb10ce43" />
   <Project Path="EasyMart.API.csproj" />
 </Solution>

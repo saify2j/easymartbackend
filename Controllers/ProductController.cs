@@ -1,4 +1,5 @@
 using EasyMart.API.Application.Common;
+using EasyMart.API.Application.Common.Interfaces;
 using EasyMart.API.Application.DTOs.Product;
 using EasyMart.API.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,13 @@ namespace EasyMart.API.Controllers
     {
         private readonly IProductService _productService;
         private readonly ILogger<ProductController> _logger;
-        public ProductController(IProductService productService, ILogger<ProductController> logger)
+        private readonly IRequestContext _requestContext;
+
+        public ProductController(IProductService productService, ILogger<ProductController> logger, IRequestContext requestContext)
         {
             _productService = productService;
             _logger = logger;
+            _requestContext = requestContext;
         }
 
         [HttpPost("AddProduct")]
@@ -22,6 +26,11 @@ namespace EasyMart.API.Controllers
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
         public async Task<IActionResult> AddProduct(ProductAddRequest request)
         {
+            //_logger.LogInformation("AddProduct request received", _requestContext.RequestId, "126.0.0.1");
+            _logger.LogInformation(
+                   "AddProduct request received | RequestId={RequestId} | ClientIp={ClientIp}",
+                   _requestContext.RequestId,
+                   _requestContext.ClientIp);
             var result = await _productService.AddProduct(request);
 
             if (!result.IsSuccess)
@@ -31,10 +40,6 @@ namespace EasyMart.API.Controllers
                     result.Message,
                     null));
             }
-
-            _logger.LogInformation(
-                "Product added. ProductId={ProductId}",
-                result.Value?.ProductId);
 
             return StatusCode(
                 StatusCodes.Status201Created,

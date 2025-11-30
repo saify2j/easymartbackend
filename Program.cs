@@ -6,10 +6,15 @@ using EasyMart.API.Application.Services;
 using EasyMart.API.Infrastructure.Persistence;
 using EasyMart.API.Middleware;
 
+// For Logger
+using Easy.Logging.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//builder.Logging.ClearProviders(); // optional - to remove default console if desired
+builder.Logging.AddBufferedLogging(builder.Configuration);
 
+// Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
