@@ -2,6 +2,7 @@ using EasyMart.API.Application.Common;
 using EasyMart.API.Application.Common.Interfaces;
 using EasyMart.API.Application.DTOs.Product;
 using EasyMart.API.Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EasyMart.API.Controllers
@@ -21,6 +22,7 @@ namespace EasyMart.API.Controllers
             _requestContext = requestContext;
         }
 
+        [Authorize(Policy = "SuperAdminPolicy")]
         [HttpPost("AddProduct")]
         [ProducesResponseType(typeof(ApiResponse<ProductAddResponse>), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status409Conflict)]
@@ -49,7 +51,7 @@ namespace EasyMart.API.Controllers
                     result.Value));
         }
 
-
+        [Authorize(Policy = "Anybody")]
         [HttpGet]
         [ProducesResponseType(typeof(ApiResponse<IEnumerable<ProductResponse>>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllProducts()

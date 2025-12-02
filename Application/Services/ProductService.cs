@@ -11,16 +11,20 @@ namespace EasyMart.API.Application.Services
     public class ProductService : IProductService
     {
         private readonly IProductRepository _productRepository;
-
-        public ProductService(IProductRepository productRepository)
+        private readonly ICurrentUser _currentUser;
+        public ProductService(IProductRepository productRepository, ICurrentUser currentUser)
         {
             _productRepository = productRepository;
+            _currentUser = currentUser;
         }
         public async Task<Result<ProductAddResponse>> AddProduct(ProductAddRequest request)
         {
             try
             {
                 var product = request.ToDomain();
+
+                // get username from current user
+                product.CreatedBy = _currentUser.Username ?? "";
 
                 var existing_product = await _productRepository.GetProductByProductName(product.ProductName);
 
