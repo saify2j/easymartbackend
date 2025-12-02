@@ -3,6 +3,9 @@ using EasyMart.API.Application.DTOs.Product;
 using EasyMart.API.Application.Interfaces;
 using EasyMart.API.Application.Interfaces.Services;
 using EasyMart.API.Application.Mappings;
+using FluentValidation;
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using static EasyMart.API.Application.Common.Constants;
 
@@ -12,15 +15,30 @@ namespace EasyMart.API.Application.Services
     {
         private readonly IProductRepository _productRepository;
         private readonly ICurrentUser _currentUser;
-        public ProductService(IProductRepository productRepository, ICurrentUser currentUser)
+        private readonly IValidator<ProductAddRequest> _productValidator;
+
+        public ProductService(IProductRepository productRepository, ICurrentUser currentUser, IValidator<ProductAddRequest> productAddValidator)
         {
             _productRepository = productRepository;
             _currentUser = currentUser;
+            _productValidator = productAddValidator;
         }
         public async Task<Result<ProductAddResponse>> AddProduct(ProductAddRequest request)
         {
             try
             {
+                var validationResult = await _productValidator.ValidateAsync(request);
+
+                if (!validationResult.IsValid)
+                {
+                    var errorMessage = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
+
+                    return Result<ProductAddResponse>.Failure(
+                    ResponseCodes.Error,
+                    errorMessage
+                   );
+                }
+
                 var product = request.ToDomain();
 
                 // get username from current user
