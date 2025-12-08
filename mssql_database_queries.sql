@@ -1,38 +1,42 @@
-CREATE TABLE Products (
-    ProductId UNIQUEIDENTIFIER PRIMARY KEY,
-    ProductName NVARCHAR(255) NOT NULL,
-    Price DECIMAL(10, 2) NOT NULL
-);
+-- Utility Queries
 
-select Count(*) FROM Products
-truncate table Products
+-- Get columns of the table as CSV
 
+-- MSSQL
+SELECT STRING_AGG(COLUMN_NAME, ', ') AS Columns
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'dbo'
+  AND TABLE_NAME = 'Products';
 
-CREATE TABLE Users (
-    UserId        INT IDENTITY PRIMARY KEY,
-    Username      NVARCHAR(100) NOT NULL UNIQUE,
-    Email         NVARCHAR(256) NOT NULL UNIQUE,
-    PasswordHash VARBINARY(256) NOT NULL,
-    PasswordSalt VARBINARY(256) NOT NULL,
-    IsActive     BIT NOT NULL DEFAULT 1,
-    CreatedAt    DATETIME2 NOT NULL DEFAULT SYSDATETIME()
-);
-
-CREATE TABLE Roles (
-    RoleId   INT IDENTITY PRIMARY KEY,
-    Name     NVARCHAR(50) NOT NULL UNIQUE,
-    Description NVARCHAR(200)
-);
-
-CREATE TABLE UserRoles (
-    UserId INT NOT NULL,
-    RoleId INT NOT NULL,
-    PRIMARY KEY (UserId, RoleId),
-    FOREIGN KEY (UserId) REFERENCES Users(UserId) ON DELETE CASCADE,
-    FOREIGN KEY (RoleId) REFERENCES Roles(RoleId) ON DELETE CASCADE
-);
+-- PostgreSQL
+SELECT STRING_AGG(column_name, ', ') AS columns
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'products'
 
 
-INSERT INTO Roles (Name) VALUES
-('SuperAdmin'),
-('User');
+-- Prepare a dummy insert statement 
+
+-- MSSQL
+SELECT 
+    'INSERT INTO ' + @schema + '.' + @table + ' (' +
+    STRING_AGG(COLUMN_NAME, ', ') +
+    ') VALUES (' +
+    STRING_AGG('NULL', ', ') +
+    ');' AS InsertStatement
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = @schema
+  AND TABLE_NAME = @table;
+
+
+-- PostgreSQL
+SELECT 
+    'INSERT INTO ' || table_schema || '.' || table_name || ' (' ||
+    STRING_AGG(column_name, ', ') ||
+    ') VALUES (' ||
+    STRING_AGG('NULL', ', ') ||
+    ');'
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'products'
+GROUP BY table_schema, table_name;
