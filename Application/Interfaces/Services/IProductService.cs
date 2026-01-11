@@ -7,5 +7,6 @@ namespace EasyMart.API.Application.Interfaces.Services
     {
         public Task<Result<ProductAddResponse>> AddProduct(ProductAddRequest product);
         public Task<Result<IEnumerable<ProductResponse>>> GetAllProducts();
+        public Task<byte[]> ConvertToWebPLosslessAsync(Stream input);
     }
 }

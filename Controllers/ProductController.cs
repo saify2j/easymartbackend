@@ -63,5 +63,18 @@ namespace EasyMart.API.Controllers
                 result.Message,
                 result.Value));
         }
+
+        [HttpPost("convert-to-webp")]
+        public async Task<IActionResult> ConvertToWebp(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Invalid file");
+
+            await using var inputStream = file.OpenReadStream();
+            var webpBytes = await _productService.ConvertToWebPLosslessAsync(inputStream);
+
+            return File(webpBytes, "image/webp",
+                Path.ChangeExtension(file.FileName, ".webp"));
+        }
     }
 }

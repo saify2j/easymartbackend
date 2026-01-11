@@ -4,10 +4,13 @@ using EasyMart.API.Application.Interfaces;
 using EasyMart.API.Application.Interfaces.Services;
 using EasyMart.API.Application.Mappings;
 using FluentValidation;
+using SixLabors.ImageSharp.Formats.Webp;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using static EasyMart.API.Application.Common.Constants;
+using SixLabors.ImageSharp;
 
 namespace EasyMart.API.Application.Services
 {
@@ -75,5 +78,23 @@ namespace EasyMart.API.Application.Services
                 CustomMessages.Success,
                 response);
         }
-    }
+
+
+        public async Task<byte[]> ConvertToWebPLosslessAsync(Stream input)
+            {
+                using var image = await Image.LoadAsync<Rgba32>(input);
+
+                var encoder = new WebpEncoder
+                {
+                    FileFormat = WebpFileFormatType.Lossy,
+                    Quality = 80,
+                    Method = WebpEncodingMethod.Fastest
+                };
+
+                using var output = new MemoryStream();
+                await image.SaveAsync(output, encoder);
+                return output.ToArray();
+            }
+
+        }
 }
